@@ -84,6 +84,9 @@ open class RunLoop {
 	private var outputHandlers = HandlerSet<OutputHandler>()
 	private var timers = PriorityQueue<Timer>({ $0.maturity < $1.maturity })
 
+	public init() {
+	}
+
 	public var isEmpty: Bool {
 		self.inputHandlers.isEmpty && self.outputHandlers.isEmpty && self.timers.isEmpty
 	}
