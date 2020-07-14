@@ -39,7 +39,7 @@ fileprivate extension fd_set {
 
 public typealias RunLoopPlugIn = FileProtocol & InputHandler
 
-public class RunLoop {
+open class RunLoop {
 	private struct HandlerSet<Handler> {
 		private var handlers = [FileDescriptor : Handler]()
 		private(set) var highest: Int32 = 0
