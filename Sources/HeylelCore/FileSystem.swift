@@ -2,6 +2,10 @@
 import Glibc
 #endif
 
+#if canImport(Darwin)
+import Darwin.libc
+#endif
+
 public typealias FileDescriptor = Int32
 
 public protocol FileProtocol: AnyObject {
@@ -105,7 +109,12 @@ public enum FilePath {
 }
 
 public final class Directory: FileProtocol, Sequence, IteratorProtocol {
+#if canImport(Glibc)
 	private let dirp: OpaquePointer
+#endif
+#if canImport(Darwin)
+	private let dirp: UnsafeMutablePointer<DIR>
+#endif
 
 	public required init(fileDescriptor: FileDescriptor) {
 		guard let dirp = fdopendir(fileDescriptor) else {

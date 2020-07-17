@@ -3,30 +3,39 @@ import HeylelCollections
 #if canImport(Glibc)
 import Glibc
 
+fileprivate typealias fd_mask = __fd_mask
+#endif
+
+#if canImport(Darwin)
+import Darwin.libc
+
+fileprivate typealias fd_mask = Int32
+#endif
+
 fileprivate extension fd_set {
-	private static let masks = MemoryLayout<Self>.stride / MemoryLayout<__fd_mask>.stride
-	private static let nfdBits = 8 * Int32(MemoryLayout<__fd_mask>.stride)
+	private static let masks = MemoryLayout<Self>.size / MemoryLayout<fd_mask>.size
+	private static let nfdBits = fd_mask(fd_mask.bitWidth)
 
 	mutating func contains(_ fileDescriptor: FileDescriptor) -> Bool {
-		withUnsafePointer(to: &self.__fds_bits) { fdsBitsPointer in
-			fdsBitsPointer.withMemoryRebound(to: __fd_mask.self, capacity: Self.masks) {
-				($0[Int(fileDescriptor / Self.nfdBits)] & (1 << __fd_mask(fileDescriptor % Self.nfdBits))) != 0
+		withUnsafePointer(to: &self) { fdsBitsPointer in
+			fdsBitsPointer.withMemoryRebound(to: fd_mask.self, capacity: Self.masks) {
+				($0[Int(fileDescriptor / Self.nfdBits)] & (1 << fd_mask(fileDescriptor % Self.nfdBits))) != 0
 			}
 		}
 	}
 
 	mutating func insert(_ fileDescriptor: FileDescriptor) {
-		withUnsafeMutablePointer(to: &self.__fds_bits) { fdsBitsPointer in
-			fdsBitsPointer.withMemoryRebound(to: __fd_mask.self, capacity: Self.masks) {
-				$0[Int(fileDescriptor / Self.nfdBits)] |= 1 << __fd_mask(fileDescriptor % Self.nfdBits)
+		withUnsafeMutablePointer(to: &self) { fdsBitsPointer in
+			fdsBitsPointer.withMemoryRebound(to: fd_mask.self, capacity: Self.masks) {
+				$0[Int(fileDescriptor / Self.nfdBits)] |= 1 << fd_mask(fileDescriptor % Self.nfdBits)
 			}
 		}
 	}
 
 	mutating func remove(_ fileDescriptor: FileDescriptor) {
-		withUnsafeMutablePointer(to: &self.__fds_bits) { fdsBitsPointer in
-			fdsBitsPointer.withMemoryRebound(to: __fd_mask.self, capacity: Self.masks) {
-				$0[Int(fileDescriptor / Self.nfdBits)] &= ~__fd_mask(fileDescriptor % Self.nfdBits)
+		withUnsafeMutablePointer(to: &self) { fdsBitsPointer in
+			fdsBitsPointer.withMemoryRebound(to: fd_mask.self, capacity: Self.masks) {
+				$0[Int(fileDescriptor / Self.nfdBits)] &= ~fd_mask(fileDescriptor % Self.nfdBits)
 			}
 		}
 	}
@@ -35,7 +44,6 @@ fileprivate extension fd_set {
 		isEmpty ? body(nil) : body(&self)
 	}
 }
-#endif
 
 public typealias RunLoopPlugIn = FileProtocol & InputHandler
 

@@ -21,7 +21,7 @@ final class HelloWorld2: HeylelCore.Timer {
 final class HeylelCoreTests: XCTestCase {
 
 	func testHelloWorld1() {
-		let runLoop = RunLoop()
+		let runLoop = HeylelCore.RunLoop()
 
 		runLoop.monitorOutput(for: 1,
 			with: BufferOutputHandler(bytes: "Hello, World!\n".data(using: .utf8)!))
@@ -30,7 +30,7 @@ final class HeylelCoreTests: XCTestCase {
 	}
 
 	func testHelloWorld2() {
-		let runLoop = RunLoop()
+		let runLoop = HeylelCore.RunLoop()
 
 		runLoop.schedule(HelloWorld2(seconds: 1))
 

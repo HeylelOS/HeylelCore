@@ -2,6 +2,10 @@
 import Glibc
 #endif
 
+#if canImport(Darwin)
+import Darwin.libc
+#endif
+
 public struct SystemError: Error, Equatable {
 	public static let argumentListTooLong                          = SystemError(errorCode: E2BIG)
 	public static let permissionDenied                             = SystemError(errorCode: EACCES)

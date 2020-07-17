@@ -2,6 +2,10 @@
 import Glibc
 #endif
 
+#if canImport(Darwin)
+import Darwin.libc
+#endif
+
 public typealias NetProtocol = Int32
 
 public typealias NetPort = UInt16
@@ -98,7 +102,7 @@ public enum NetAddress {
 
 		addr.sun_family = sa_family_t(AF_UNIX)
 #if canImport(Darwin)
-		addr.sun_len = path.utf8.count
+		addr.sun_len = UInt8(path.utf8.count)
 #endif
 
 		self = .unix(addr)

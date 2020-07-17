@@ -4,6 +4,10 @@ import HeylelCore
 import Glibc
 #endif
 
+#if canImport(Darwin)
+import Darwin.libc
+#endif
+
 public extension FileDescriptor {
 	static func makeSocket(in netDomain: NetDomain,
 		as netType: NetType, following netProtocol: NetProtocol) throws -> FileDescriptor {

@@ -2,6 +2,10 @@
 import Glibc
 #endif
 
+#if canImport(Darwin)
+import Darwin.libc
+#endif
+
 public typealias TimeSlice = Double
 
 public protocol Timer: AnyObject {
