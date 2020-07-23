@@ -12,39 +12,6 @@ import Darwin.libc
 fileprivate typealias fd_mask = Int32
 #endif
 
-fileprivate extension fd_set {
-	private static let masks = MemoryLayout<Self>.size / MemoryLayout<fd_mask>.size
-	private static let nfdBits = fd_mask(fd_mask.bitWidth)
-
-	mutating func contains(_ fileDescriptor: FileDescriptor) -> Bool {
-		withUnsafePointer(to: &self) { fdsBitsPointer in
-			fdsBitsPointer.withMemoryRebound(to: fd_mask.self, capacity: Self.masks) {
-				($0[Int(fd_mask(fileDescriptor) / Self.nfdBits)] & (1 << fd_mask(fileDescriptor) % Self.nfdBits)) != 0
-			}
-		}
-	}
-
-	mutating func insert(_ fileDescriptor: FileDescriptor) {
-		withUnsafeMutablePointer(to: &self) { fdsBitsPointer in
-			fdsBitsPointer.withMemoryRebound(to: fd_mask.self, capacity: Self.masks) {
-				$0[Int(fd_mask(fileDescriptor) / Self.nfdBits)] |= 1 << fd_mask(fileDescriptor) % Self.nfdBits
-			}
-		}
-	}
-
-	mutating func remove(_ fileDescriptor: FileDescriptor) {
-		withUnsafeMutablePointer(to: &self) { fdsBitsPointer in
-			fdsBitsPointer.withMemoryRebound(to: fd_mask.self, capacity: Self.masks) {
-				$0[Int(fd_mask(fileDescriptor) / Self.nfdBits)] &= ~fd_mask(fileDescriptor) % Self.nfdBits
-			}
-		}
-	}
-
-	mutating func withSelectPointer<T>(isEmpty: Bool, _ body: @escaping (UnsafeMutablePointer<Self>?) -> T) -> T {
-		isEmpty ? body(nil) : body(&self)
-	}
-}
-
 public typealias RunLoopPlugIn = FileProtocol & InputHandler
 
 open class RunLoop {
@@ -145,6 +112,39 @@ open class RunLoop {
 		while !self.isEmpty {
 			self.loop()
 		}
+	}
+}
+
+fileprivate extension fd_set {
+	private static let masks = MemoryLayout<Self>.size / MemoryLayout<fd_mask>.size
+	private static let nfdBits = fd_mask(fd_mask.bitWidth)
+
+	mutating func contains(_ fileDescriptor: FileDescriptor) -> Bool {
+		withUnsafePointer(to: &self) { fdsBitsPointer in
+			fdsBitsPointer.withMemoryRebound(to: fd_mask.self, capacity: Self.masks) {
+				($0[Int(fd_mask(fileDescriptor) / Self.nfdBits)] & (1 << fd_mask(fileDescriptor) % Self.nfdBits)) != 0
+			}
+		}
+	}
+
+	mutating func insert(_ fileDescriptor: FileDescriptor) {
+		withUnsafeMutablePointer(to: &self) { fdsBitsPointer in
+			fdsBitsPointer.withMemoryRebound(to: fd_mask.self, capacity: Self.masks) {
+				$0[Int(fd_mask(fileDescriptor) / Self.nfdBits)] |= 1 << fd_mask(fileDescriptor) % Self.nfdBits
+			}
+		}
+	}
+
+	mutating func remove(_ fileDescriptor: FileDescriptor) {
+		withUnsafeMutablePointer(to: &self) { fdsBitsPointer in
+			fdsBitsPointer.withMemoryRebound(to: fd_mask.self, capacity: Self.masks) {
+				$0[Int(fd_mask(fileDescriptor) / Self.nfdBits)] &= ~fd_mask(fileDescriptor) % Self.nfdBits
+			}
+		}
+	}
+
+	mutating func withSelectPointer<T>(isEmpty: Bool, _ body: @escaping (UnsafeMutablePointer<Self>?) -> T) -> T {
+		isEmpty ? body(nil) : body(&self)
 	}
 }
 
