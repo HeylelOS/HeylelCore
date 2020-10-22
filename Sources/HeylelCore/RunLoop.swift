@@ -122,7 +122,7 @@ fileprivate extension fd_set {
 	mutating func contains(_ fileDescriptor: FileDescriptor) -> Bool {
 		withUnsafePointer(to: &self) { fdsBitsPointer in
 			fdsBitsPointer.withMemoryRebound(to: fd_mask.self, capacity: Self.masks) {
-				($0[Int(fd_mask(fileDescriptor) / Self.nfdBits)] & (1 << fd_mask(fileDescriptor) % Self.nfdBits)) != 0
+				($0[Int(fd_mask(fileDescriptor) / Self.nfdBits)] & (1 << (fd_mask(fileDescriptor) % Self.nfdBits))) != 0
 			}
 		}
 	}
@@ -130,7 +130,7 @@ fileprivate extension fd_set {
 	mutating func insert(_ fileDescriptor: FileDescriptor) {
 		withUnsafeMutablePointer(to: &self) { fdsBitsPointer in
 			fdsBitsPointer.withMemoryRebound(to: fd_mask.self, capacity: Self.masks) {
-				$0[Int(fd_mask(fileDescriptor) / Self.nfdBits)] |= 1 << fd_mask(fileDescriptor) % Self.nfdBits
+				$0[Int(fd_mask(fileDescriptor) / Self.nfdBits)] |= 1 << (fd_mask(fileDescriptor) % Self.nfdBits)
 			}
 		}
 	}
